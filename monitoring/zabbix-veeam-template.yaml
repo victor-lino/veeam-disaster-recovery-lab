@@ -1,0 +1,38 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: f47ac10b58cc4372a5670e02b2c3d479
+      template: 'Template Veeam Backup'
+      name: 'Template Veeam Backup'
+      groups:
+        - name: Templates/Applications
+      discovery_rules:
+        - uuid: 8b19e98e4d3a4b9195bd6b8c9d0a6c22
+          name: 'Veeam Jobs Discovery'
+          type: ZABBIX_ACTIVE
+          key: veeam.discovery
+          delay: 1h
+          item_prototypes:
+            - uuid: c3c6f6c9d0344d9f8d381c8538c281e5
+              name: 'Veeam Job [{#JOBNAME}]: Status'
+              type: ZABBIX_ACTIVE
+              key: 'veeam.job.status[{#JOBNAME}]'
+              delay: 15m
+              value_type: TEXT
+              trends: '0'
+              timeout: 60s
+              trigger_prototypes:
+                - uuid: d9b2d63d6b05423f8b05615d6c8e31a1
+                  expression: 'find(/Template Veeam Backup/veeam.job.status[{#JOBNAME}],,"like","Failed")=1'
+                  name: 'Veeam Job [{#JOBNAME}] Failed'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: e68c17b8f9a243ebb9f32e9f84715b74
+                  expression: 'find(/Template Veeam Backup/veeam.job.status[{#JOBNAME}],,"like","Warning")=1'
+                  name: 'Veeam Job [{#JOBNAME}] Warning'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+          timeout: 60s
